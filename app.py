@@ -36,5 +36,30 @@ def list_user(id):
     return user_controller.list(request, id)
 
 
+@app.route('/resource', methods=['POST'], strict_slashes=False)
+def create_resource():
+    return resource_controller.create(request)
+
+
+@app.route('/resource/<id>', methods=['GET'], strict_slashes=False)
+def get_resource(id):
+    return resource_controller.read(request, id)
+
+
+@app.route('/resource', methods=['GET'], strict_slashes=False)
+def list_resource():
+    return resource_controller.list(request)
+
+
+@app.route('/group/<id>/authorize', methods=['POST'], strict_slashes=False)
+def auth_group(id):
+    return resource_controller.add(request, id)
+
+
+@app.route('/group/<id>/resource', methods=['GET'], strict_slashes=False)
+def list_resource_by_group(id):
+    return resource_controller.list_by_group(request, id)
+
+
 if __name__ == '__main__':
     app.run()
