@@ -61,5 +61,10 @@ def list_resource_by_group(id):
     return resource_controller.list_by_group(request, id)
 
 
+@app.route('/authorized', methods=['GET'], strict_slashes=False)
+def check_auth():
+    return auth_controller.is_authorized(request)
+
+
 if __name__ == '__main__':
     app.run()

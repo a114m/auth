@@ -167,6 +167,27 @@ class ResourceController(object):
         return jsonify(result)
 
 
+class AuthController(object):
+    def is_authorized(self, request):
+        try:
+            user_id = request.args['userId']
+            resource_name = request.args['resourceName']
+        except KeyError:
+            abort(400)
+
+        user = User.query.get_or_404(user_id)
+        resource = Resource.query.filter(Resource.name == resource_name).first()
+        if resource is None:
+            abort(404)
+
+        is_authorized = not set(user.groups).isdisjoint(resource.groups)
+        result = {
+            "authorized": is_authorized
+        }
+        return jsonify(result)
+
+
 group_controller = GroupController()
 user_controller = UserController()
 resource_controller = ResourceController()
+auth_controller = AuthController()
