@@ -1,0 +1,41 @@
+version: '2'
+services:
+  postgres:
+    image: 'postgres:9.4.15-alpine'
+    ports:
+      - '5432:5432'
+    restart: always
+    volumes:
+      - 'postgres:/var/lib/postgresql/data'
+
+  app:
+    build: .
+    image: auth_app:latest
+    ports:
+      - '5000:5000'
+    volumes:
+      - .:/app
+    working_dir: /app
+    links:
+      - postgres
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DBNAME=famtree_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASS=
+    restart: always
+
+  # redis:
+  #   image: 'redis:3.2-alpine'
+  #   ports:
+  #     - '6379:6379'
+  #   restart: always
+  #   volumes:
+  #     - 'redis:/data'
+
+volumes:
+  postgres:
+  # redis:
