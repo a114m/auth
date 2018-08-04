@@ -20,8 +20,8 @@ class Group(db.Model):
     __tablename__ = 'groups'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), index=True, unique=True)
-    description = db.Column(db.String())
+    name = db.Column(db.String(), index=True, unique=True, nullable=False)
+    description = db.Column(db.String(), nullable=True)
 
     def __init__(self, name, description=""):
         self.name = name
@@ -35,7 +35,7 @@ class Resource(db.Model):
     __tablename__ = 'resources'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), index=True, unique=True)
+    name = db.Column(db.String(), index=True, unique=True, nullable=False)
     groups = db.Column(JSONB)
 
     def __init__(self, name, groups=None):
