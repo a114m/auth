@@ -1,20 +1,31 @@
 version: '2'
 services:
   postgres:
-    image: 'postgres:9.4.15-alpine'
+    image: 'postgres:9.4-alpine'
     ports: ['5432:5432']
     environment:
-      - POSTGRES_USER: postgres
-      - POSTGRES_PASSWORD: postgres
-      - POSTGRES_DB: auth
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth
     volumes: ['postgres:/var/lib/postgresql/data']
     restart: always
 
   app:
-    image: python:3-alpine
-    command: ["./app.py"]
+    build: .
+    image: auth:latest
+    entrypoint: ["/bin/sh"]
+    command:
+      - "-exec"
+      - |-
+        pip install -r requirements.txt
+        python manage.py db upgrade
+        python -m flask run '--host=0.0.0.0'
     ports: ['5000:5000']
     working_dir: /app
+    environment:
+      FLASK_APP: "app.py"
+      APP_ENV: "config.DevelopmentConfig"
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/auth"
     links:
       - postgres
     depends_on:
@@ -22,14 +33,5 @@ services:
     volumes: ['.:/app']
     restart: always
 
-  # redis:
-  #   image: 'redis:3.2-alpine'
-  #   ports:
-  #     - '6379:6379'
-  #   restart: always
-  #   volumes:
-  #     - 'redis:/data'
-
 volumes:
   postgres:
-  # redis:
