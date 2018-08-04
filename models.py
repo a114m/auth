@@ -1,12 +1,12 @@
 from app import db
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.String(24), primary_key=True)
-    groups = db.Column(JSON)
+    groups = db.Column(JSONB)
 
     def __init__(self, id, groups=None):
         self.id = id
@@ -36,7 +36,7 @@ class Resource(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), index=True, unique=True)
-    groups = db.Column(JSON)
+    groups = db.Column(JSONB)
 
     def __init__(self, name, groups=None):
         self.name = name

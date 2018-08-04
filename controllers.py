@@ -1,4 +1,4 @@
-from flask import abort, jsonify
+from flask import abort, jsonify, Response
 from app import db
 from helpers import load_body
 from models import *
@@ -49,7 +49,40 @@ class GroupController(object):
 
 
 class UserController(object):
-    pass
+    def add(self, request, group_id):
+        try:
+            group_id = int(group_id)
+            data = load_body(request)
+            users_ids = map(lambda item: item['userId'], data)
+            users = list()
+            for user_id in users_ids:
+                user = User.query.get(user_id)  # TODO: check if
+                if not user:
+                    user = User(id=user_id, groups=[group_id])
+                    db.session.add(user)
+                else:
+                    users.append(user)
+            for user in users:
+                if group_id not in user.groups:
+                    user.groups = user.groups + [group_id]
+        except Exception:
+            db.session.rollback()
+            abort(400)
+        else:
+            db.session.commit()
+            return Response(status=204)
+
+    def list(self, request, group_id):
+        q = User.query.filter(User.groups.contains(group_id))
+        count = q.count()
+        items = map(lambda u: {
+            "userId": u.id
+        }, q.all())
+        result = {
+            "count": count,
+            "items": list(items)
+        }
+        return jsonify(result)
 
 
 class ResourceController(object):

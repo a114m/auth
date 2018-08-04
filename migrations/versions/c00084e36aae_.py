@@ -1,13 +1,13 @@
 """empty message
 
-Revision ID: 58c869af6093
+Revision ID: c00084e36aae
 Revises: None
-Create Date: 2018-08-02 14:17:11.174669
+Create Date: 2018-08-02 19:26:22.967935
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '58c869af6093'
+revision = 'c00084e36aae'
 down_revision = None
 
 from alembic import op
@@ -26,13 +26,13 @@ def upgrade():
     op.create_table('resources',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
-    sa.Column('groups', postgresql.JSON(astext_type=sa.Text()), nullable=True),
+    sa.Column('groups', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_resources_name'), 'resources', ['name'], unique=True)
     op.create_table('users',
     sa.Column('id', sa.String(length=24), nullable=False),
-    sa.Column('groups', postgresql.JSON(astext_type=sa.Text()), nullable=True),
+    sa.Column('groups', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
