@@ -1,7 +1,6 @@
 from flask import jsonify
-from app import db
 from helpers import load_body, Response
-from models import *
+from models import db, User, Group, Resource
 from sqlalchemy.exc import IntegrityError
 import traceback
 
@@ -133,7 +132,7 @@ class ResourceController(object):
                 "message": "Bad Request, request has to be a valid application-json."
             })
         try:
-            resource = Resource(name=data["name"])
+            resource = Resource(name=data["name"], groups=data.get("groups", []))
             db.session.add(resource)
             db.session.commit()
         except KeyError as err:

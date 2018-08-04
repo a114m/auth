@@ -1,5 +1,9 @@
-from app import db
+from app import app
 from sqlalchemy.dialects.postgresql import JSONB
+from flask_sqlalchemy import SQLAlchemy
+
+
+db = SQLAlchemy(app)
 
 
 class User(db.Model):

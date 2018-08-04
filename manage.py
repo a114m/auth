@@ -2,7 +2,8 @@ import os
 from flask_migrate import Manager
 from flask_migrate import Migrate, MigrateCommand
 
-from app import app, db
+from app import app
+from models import db
 
 
 app.config.from_object(os.getenv('APP_ENV', 'config.DevelopmentConfig'))
