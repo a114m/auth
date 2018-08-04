@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, abort, jsonify
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -64,6 +64,26 @@ def list_resource_by_group(id):
 @app.route('/authorized', methods=['GET'], strict_slashes=False)
 def check_auth():
     return auth_controller.is_authorized(request)
+
+
+@app.errorhandler(404)
+def not_found(error=None):
+    result = jsonify({
+            'status': 404,
+            'message': 'URL Not Found: ' + request.url,
+    })
+    result.status_code = 404
+    return result
+
+
+@app.errorhandler(500)
+def internal_error(error=None):
+    result = jsonify({
+            'status': 500,
+            'message': 'Internal Server Error!'
+    })
+    result.status_code = 500
+    return result
 
 
 if __name__ == '__main__':

@@ -1,21 +1,41 @@
-from flask import abort, jsonify, Response
+from flask import jsonify
 from app import db
-from helpers import load_body
+from helpers import load_body, Response
 from models import *
+from sqlalchemy.exc import IntegrityError
 import traceback
 
 
 class GroupController(object):
     def create(self, request):
         data = load_body(request)
-        group = Group(data["name"], data["description"])
+        if data is None:
+            return Response(status=400, response={"Error": "Bad Request, request has to be a valid application-json."})
         try:
+            group = Group(data["name"], data.get("description"))
             db.session.add(group)
             db.session.commit()
+        except KeyError as err:
+            print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
+            db.session.rollback()
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Missing key in body"
+            })
+        except IntegrityError as err:
+            print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
+            db.session.rollback()
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Resource already exists"
+            })
         except Exception as err:
             print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
             db.session.rollback()
-            abort(400)
+            return Response(status=500, response={
+                "status": 500,
+                "message": "Internal Server Error"
+            })
         else:
             result = {
                 "id": group.id,
@@ -57,7 +77,7 @@ class UserController(object):
             users_ids = map(lambda item: item['userId'], data)
             users = list()
             for user_id in users_ids:
-                user = User.query.get(user_id)  # TODO: check if single query is executed each loop then ehance using filters
+                user = User.query.get(user_id)  # XXX: if single query is executed each loop then ehance to execute one query using filters
                 if not user:
                     user = User(id=user_id, groups=[group_id])
                     db.session.add(user)
@@ -66,10 +86,27 @@ class UserController(object):
             for user in users:
                 if group_id not in user.groups:
                     user.groups = user.groups + [group_id]
+        except KeyError as err:
+            print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
+            db.session.rollback()
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Missing key in body"
+            })
+        except IntegrityError as err:
+            print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
+            db.session.rollback()
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Resource already exists"
+            })
         except Exception as err:
             print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
             db.session.rollback()
-            abort(400)
+            return Response(status=500, response={
+                "status": 500,
+                "message": "Internal Server Error"
+            })
         else:
             db.session.commit()
             return Response(status=204)
@@ -90,14 +127,36 @@ class UserController(object):
 class ResourceController(object):
     def create(self, request):
         data = load_body(request)
-        resource = Resource(name=data["name"])
+        if data is None:
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Bad Request, request has to be a valid application-json."
+            })
         try:
+            resource = Resource(name=data["name"])
             db.session.add(resource)
             db.session.commit()
+        except KeyError as err:
+            print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
+            db.session.rollback()
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Missing key in body"
+            })
+        except IntegrityError as err:
+            print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
+            db.session.rollback()
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Resource already exists"
+            })
         except Exception as err:
             print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
             db.session.rollback()
-            abort(400)
+            return Response(status=500, response={
+                "status": 500,
+                "message": "Internal Server Error"
+            })
         else:
             result = {
                 "id": resource.id,
@@ -135,19 +194,39 @@ class ResourceController(object):
             resources_ids = map(lambda item: item['resourceId'], data)
             resources = list()
             for resource_id in resources_ids:
-                resource = Resource.query.get(resource_id)  # TODO: check if single query is executed each loop then ehance using filters
+                resource = Resource.query.get(resource_id)  # XXX: if single query is executed each loop then ehance to execute one query using filters
                 if not resource:
                     Resource.query.session.rollback()
-                    abort(404)
+                    return Response(status=404, response={
+                        "status": 404,
+                        "message": "Resource Not Found, resourceId: %s" % resource_id
+                    })
                 else:
                     resources.append(resource)
             for resource in resources:
                 if group_id not in resource.groups:
                     resource.groups = resource.groups + [group_id]
+        except KeyError as err:
+            print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
+            db.session.rollback()
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Missing key in body"
+            })
+        except IntegrityError as err:
+            print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
+            db.session.rollback()
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Resource already exists"
+            })
         except Exception as err:
             print("Error: %s\nStacktrace: %s" % (err, traceback.format_exc()))
             db.session.rollback()
-            abort(400)
+            return Response(status=500, response={
+                "status": 500,
+                "message": "Internal Server Error"
+            })
         else:
             db.session.commit()
             return Response(status=204)
@@ -173,18 +252,19 @@ class AuthController(object):
             user_id = request.args['userId']
             resource_name = request.args['resourceName']
         except KeyError:
-            abort(400)
+            return Response(status=400, response={
+                "status": 400,
+                "message": "Missing query param 'userId' or 'resourceName'"
+            })
 
-        user = User.query.get_or_404(user_id)
+        user = User.query.get(user_id)
         resource = Resource.query.filter(Resource.name == resource_name).first()
-        if resource is None:
-            abort(404)
+        if user is None or resource is None:
+            return Response(status=400, response={"error": "Invalid 'userId' or 'resourceName'"})
 
-        is_authorized = not set(user.groups).isdisjoint(resource.groups)
-        result = {
-            "authorized": is_authorized
-        }
-        return jsonify(result)
+        is_authorized = not set(user.groups).isdisjoint(resource.groups)  # check if both user and resource has relation with the same group
+
+        return Response(response={"authorized": is_authorized}, status=200 if is_authorized else 403)
 
 
 group_controller = GroupController()
