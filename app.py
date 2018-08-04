@@ -1,12 +1,14 @@
 import os
-from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask import Flask, jsonify
+from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
 app.config.from_object(os.getenv('APP_ENV', 'config.DevelopmentConfig'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
+
+from models import *
 
 
 @app.route('/')
