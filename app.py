@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
 
 def create_app(config):
@@ -11,6 +12,7 @@ def create_app(config):
 
 
 app = create_app(os.environ['APP_ENV'])
+db = SQLAlchemy(app)
 
 from routes import Routes
 Routes()
