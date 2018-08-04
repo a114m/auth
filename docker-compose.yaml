@@ -2,30 +2,24 @@ version: '2'
 services:
   postgres:
     image: 'postgres:9.4.15-alpine'
-    ports:
-      - '5432:5432'
+    ports: ['5432:5432']
+    environment:
+      - POSTGRES_USER: postgres
+      - POSTGRES_PASSWORD: postgres
+      - POSTGRES_DB: auth
+    volumes: ['postgres:/var/lib/postgresql/data']
     restart: always
-    volumes:
-      - 'postgres:/var/lib/postgresql/data'
 
   app:
-    build: .
-    image: auth_app:latest
-    ports:
-      - '5000:5000'
-    volumes:
-      - .:/app
+    image: python:3-alpine
+    command: ["./app.py"]
+    ports: ['5000:5000']
     working_dir: /app
     links:
       - postgres
     depends_on:
       - postgres
-    environment:
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_DBNAME=famtree_dev
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASS=
+    volumes: ['.:/app']
     restart: always
 
   # redis:
