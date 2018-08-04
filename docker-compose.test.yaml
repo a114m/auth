@@ -1,0 +1,14 @@
+version: '2'
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: auth_tests
+
+  app:
+    command:
+      - "-exec"
+      - |-
+        pip install -r requirements.txt
+        nosetests -v tests/test_app.py
+    environment:
+      APP_ENV: "config.TestingConfig"

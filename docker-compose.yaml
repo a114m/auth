@@ -26,12 +26,12 @@ services:
       FLASK_APP: "app.py"
       APP_ENV: "config.DevelopmentConfig"
       DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/auth"
+      DATABASE_URL_TESTS: "postgresql://postgres:postgres@postgres:5432/auth_tests"
     links:
       - postgres
     depends_on:
       - postgres
     volumes: ['.:/app']
-    restart: always
 
 volumes:
   postgres:
