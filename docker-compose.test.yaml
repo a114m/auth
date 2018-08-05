@@ -9,6 +9,6 @@ services:
       - "-exec"
       - |-
         pip install -r requirements.txt
-        nosetests -v tests/test_app.py
+        nosetests -v --exe --with-doctest -d
     environment:
       APP_ENV: "config.TestingConfig"
