@@ -1,5 +1,19 @@
-from app import app, db
+import os
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSONB
+
+
+def create_app(config):
+    app = Flask(__name__)
+    app.config.from_object(config)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+
+    return app
+
+
+app = create_app(os.environ['APP_ENV'])
+db = SQLAlchemy(app)
 
 
 class User(db.Model):

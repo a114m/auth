@@ -1,6 +1,6 @@
 from flask import jsonify
 from helpers import load_body, Response
-from app import db
+from models import db
 from models import User, Group, Resource
 from sqlalchemy.exc import IntegrityError
 import traceback
